@@ -13,15 +13,6 @@ on:
       generate_assets:
         type: boolean
         description: Generate assets
-      checkout_pr:
-        type: string
-        description: Checkout PR
-      void_commit:
-        type: string
-        description: Checkout specific Void commit
-      void_release:
-        type: string
-        description: Custom release number
   repository_dispatch:
     types: [stable]
   push:
@@ -224,7 +215,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_arch: ${{ matrix.npm_arch }}
-        run: ./build/osx/package_bin.sh
+          OS_NAME: osx
+        run: ./build.sh
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
 
       - name: Prepare assets
@@ -415,10 +407,11 @@ jobs:
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
 
       - name: Build
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           npm_config_arch: ${{ matrix.npm_arch }}
-        run: ./build/windows/package_bin.sh
+        run: ./build/windows/package.sh
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
 
       - name: Prepare assets
