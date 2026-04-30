@@ -12,10 +12,10 @@ on:
       checkout_pr:
         type: string
         description: Checkout PR
-      void_commit: # Void added this
+      void_commit:
         type: string
         description: Checkout specific Void commit
-      void_release: # Void added this
+      void_release:
         type: string
         description: Custom release number
   repository_dispatch:
@@ -63,9 +63,9 @@ jobs:
         run: ./get_pr.sh
 
       - name: Clone VSCode repo
-        env: # Void added this
-          VOID_COMMIT: ${{ github.event.inputs.void_commit }} # Void added this
-          VOID_RELEASE: ${{ github.event.inputs.void_release }} # Void added this
+        env:
+          VOID_COMMIT: ${{ github.event.inputs.void_commit }}
+          VOID_RELEASE: ${{ github.event.inputs.void_release }}
         run: ./get_repo.sh
 
       - name: Check PR or cron
@@ -111,7 +111,6 @@ jobs:
           platform: x64
         if: env.SHOULD_BUILD == 'yes'
 
-      # Void added this to fix annoying errors
       - name: Add ubuntu-toolchain-r PPA keys
         run: |
           sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
@@ -134,9 +133,9 @@ jobs:
         if: env.SHOULD_BUILD == 'yes'
 
       - name: Clone VSCode repo
-        env: # Void added this
-          VOID_COMMIT: ${{ github.event.inputs.void_commit }} # Void added this
-          VOID_RELEASE: ${{ github.event.inputs.void_release }} # Void added this
+        env:
+          VOID_COMMIT: ${{ github.event.inputs.void_commit }}
+          VOID_RELEASE: ${{ github.event.inputs.void_release }}
         run: ./get_repo.sh
         if: env.SHOULD_BUILD == 'yes'
 
