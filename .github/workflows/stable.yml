@@ -219,6 +219,10 @@ jobs:
         run: ./build.sh
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
 
+      - name: Clean dependencies cache
+        run: rm -rf /tmp/vscode-amd64-sysroot /tmp/debian_bullseye_amd64-sysroot
+        if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes' && (env.SHOULD_DEPLOY == 'yes' || github.event.inputs.generate_assets == 'true')
+
       - name: Prepare assets
         env:
           SHOULD_BUILD_REH: 'no'
