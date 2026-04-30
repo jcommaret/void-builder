@@ -1,4 +1,7 @@
-# CI complète dans ce fichier : check → compile Ubuntu → builds macOS / Linux / Windows / REH en parallèle.
+# ─── Orchestrateur CI stable ───────────────────────────────────────────────
+# Un seul workflow : check (Ubuntu) → compile (sources + vscode.tar.gz) → en parallèle :
+#   build_macos | build_linux | build_windows | reh_linux
+# Ne pas dupliquer ce pipeline dans d’autres fichiers sous peine de multiplier compile × N sur chaque push.
 name: stable
 
 on:
