@@ -193,13 +193,7 @@ jobs:
         run: ./get_pr.sh
         if: env.DISABLED != 'yes'
 
-      - name: Setup GCC
-        uses: egor-tensin/setup-gcc@v2
-        with:
-          version: 10
-          platform: x64
-        if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
-
+      # Pas de egor-tensin/setup-gcc sur macOS : l’action ne supporte que Linux ; clang/Xcode suffit.
       - name: Setup Node.js environment
         uses: actions/setup-node@v5
         with:
