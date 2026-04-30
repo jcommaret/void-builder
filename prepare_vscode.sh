@@ -45,7 +45,9 @@ if [[ "${VSCODE_QUALITY}" == "insider" ]]; then
   done
 fi
 
-if [[ -d "../patches/${OS_NAME}/" ]]; then
+# OS_NAME vide = job compile Ubuntu : ne pas traiter ../patches/ comme un « sous-dossier OS »
+# (sinon on réapplique ../patches/*.patch deux fois et add-remote-url etc. échouent).
+if [[ -n "${OS_NAME}" ]] && [[ -d "../patches/${OS_NAME}/" ]]; then
   echo "Applying OS patches (${OS_NAME})..." # Void comment
   for file in "../patches/${OS_NAME}/"*.patch; do
     if [[ -f "${file}" ]]; then
