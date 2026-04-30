@@ -21,14 +21,14 @@ on:
   repository_dispatch:
     types: [stable]
   push:
-    branches: [ master ]
+    branches: [master]
     paths-ignore:
-    - '**/*.md'
-    - 'upstream/*.json'
+      - '**/*.md'
+      - 'upstream/*.json'
   pull_request:
-    branches: [ master ]
+    branches: [master]
     paths-ignore:
-    - '**/*.md'
+      - '**/*.md'
 
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
@@ -44,141 +44,35 @@ env:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
-    outputs:
-      MS_COMMIT: ${{ env.MS_COMMIT }}
-      MS_TAG: ${{ env.MS_TAG }}
-      RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
-      SHOULD_BUILD: ${{ env.SHOULD_BUILD }}
-      SHOULD_DEPLOY: ${{ env.SHOULD_DEPLOY }}
-
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ env.GITHUB_BRANCH }}
-
-      - name: Switch to relevant branch
-        env:
-          PULL_REQUEST_ID: ${{ github.event.inputs.checkout_pr }}
-        run: ./get_pr.sh
-
-      - name: Clone VSCode repo
-        env:
-          VOID_COMMIT: ${{ github.event.inputs.void_commit }}
-          VOID_RELEASE: ${{ github.event.inputs.void_release }}
-        run: ./get_repo.sh
-
-      - name: Check PR or cron
-        env:
-          GENERATE_ASSETS: ${{ github.event.inputs.generate_assets }}
-        run: ./check_cron_or_pr.sh
-
-      - name: Check existing VSCodium tags/releases
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CHECK_ALL: 'yes'
-        run: ./check_tags.sh
+    uses: ./.github/workflows/reusable-stable-check.yml
+    secrets: inherit
 
   compile:
-    needs:
-      - check
-    runs-on: ubuntu-22.04
-    env:
-      MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
-      MS_TAG: ${{ needs.check.outputs.MS_TAG }}
-      RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
-      SHOULD_BUILD: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
-      VSCODE_ARCH: 'x64'
-    outputs:
-      BUILD_SOURCEVERSION: ${{ env.BUILD_SOURCEVERSION }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ env.GITHUB_BRANCH }}
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Switch to relevant branch
-        env:
-          PULL_REQUEST_ID: ${{ github.event.inputs.checkout_pr }}
-        run: ./get_pr.sh
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Setup GCC
-        uses: egor-tensin/setup-gcc@v2
-        with:
-          version: 10
-          platform: x64
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Add ubuntu-toolchain-r PPA keys
-        run: |
-          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \
-            --recv-keys 2C277A0A352154E5 1E9377A2BA9EF27F
-
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.18.2'
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Setup Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Install libkrb5-dev
-        run: sudo apt-get update -y && sudo apt-get install -y libkrb5-dev
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Clone VSCode repo
-        env:
-          VOID_COMMIT: ${{ github.event.inputs.void_commit }}
-          VOID_RELEASE: ${{ github.event.inputs.void_release }}
-        run: ./get_repo.sh
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Build
-        env:
-          SHOULD_BUILD_REH: 'no'
-          SHOULD_BUILD_REH_WEB: 'no'
-        run: ./build.sh
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Compress vscode artifact
-        run: |
-          find vscode -type f -not -path "*/node_modules/*" -not -path "vscode/.build/node/*" -not -path "vscode/.git/*" > vscode.txt
-          echo "vscode/.build/extensions/node_modules" >> vscode.txt
-          echo "vscode/.git" >> vscode.txt
-          tar -czf vscode.tar.gz -T vscode.txt
-        if: env.SHOULD_BUILD == 'yes'
-
-      - name: Upload vscode artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: vscode
-          path: ./vscode.tar.gz
-          retention-days: ${{ needs.check.outputs.SHOULD_DEPLOY == 'yes' && 30 || 1 }}
-        if: env.SHOULD_BUILD == 'yes'
+    needs: [check]
+    uses: ./.github/workflows/reusable-stable-compile.yml
+    secrets: inherit
+    with:
+      ms_commit: ${{ needs.check.outputs.MS_COMMIT }}
+      ms_tag: ${{ needs.check.outputs.MS_TAG }}
+      release_version: ${{ needs.check.outputs.RELEASE_VERSION }}
+      should_build: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
+      should_deploy: ${{ needs.check.outputs.SHOULD_DEPLOY }}
 
   build:
-    needs:
-      - check
-      - compile
+    needs: [check, compile]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
-        - slug: X64
-          vscode_arch: x64
-          npm_arch: x64
-          image: vscodium/vscodium-linux-build-agent:focal-x64
-        - slug: ARM64
-          vscode_arch: arm64
-          npm_arch: arm64
-          image: vscodium/vscodium-linux-build-agent:focal-arm64
+          - slug: X64
+            vscode_arch: x64
+            npm_arch: x64
+            image: vscodium/vscodium-linux-build-agent:focal-x64
+          - slug: ARM64
+            vscode_arch: arm64
+            npm_arch: arm64
+            image: vscodium/vscodium-linux-build-agent:focal-arm64
     container:
       image: ${{ matrix.image }}
     env:
@@ -270,20 +164,18 @@ jobs:
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes' && env.SHOULD_DEPLOY == 'no' && github.event.inputs.generate_assets == 'true'
 
   reh_linux:
-    needs:
-      - check
-      - compile
+    needs: [check, compile]
     runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         include:
-        - slug: X64
-          vscode_arch: x64
-          npm_arch: x64
-        - slug: ARM64
-          vscode_arch: arm64
-          npm_arch: arm64
+          - slug: X64
+            vscode_arch: x64
+            npm_arch: x64
+          - slug: ARM64
+            vscode_arch: arm64
+            npm_arch: arm64
     env:
       BUILD_SOURCEVERSION: ${{ needs.compile.outputs.BUILD_SOURCEVERSION }}
       DISABLED: ${{ vars[format('DISABLE_STABLE_LINUX_REH_{0}', matrix.slug)] }}
@@ -315,9 +207,9 @@ jobs:
         if: env.DISABLED != 'yes'
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
-          node-version: '20.18.2'
+          node-version: '22.22.2'
         if: env.DISABLED != 'yes'
 
       - name: Setup Python 3
