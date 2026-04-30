@@ -1,4 +1,4 @@
-# Centralise le job « check » pour stable-macos, stable-linux, stable-windows.
+# Job « check » partagé ; appelé par le workflow orchestrateur « stable ».
 name: reusable stable check
 
 on:

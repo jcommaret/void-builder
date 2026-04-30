@@ -28,4 +28,4 @@ For maintainers: [`void-builder/`](https://github.com/voideditor/void-builder#re
 ## Status
 If any downloads give a 404, this version is likely very new. Try the previous version until the workflows complete!
 
-[![stable-windows](https://github.com/voideditor/void-builder/actions/workflows/stable-windows.yml/badge.svg)](https://github.com/voideditor/void-builder/actions/workflows/stable-windows.yml) [![stable-macos](https://github.com/voideditor/void-builder/actions/workflows/stable-macos.yml/badge.svg)](https://github.com/voideditor/void-builder/actions/workflows/stable-macos.yml) [![stable-linux](https://github.com/voideditor/void-builder/actions/workflows/stable-linux.yml/badge.svg)](https://github.com/voideditor/void-builder/actions/workflows/stable-linux.yml)
+[![stable](https://github.com/voideditor/void-builder/actions/workflows/stable.yml/badge.svg)](https://github.com/voideditor/void-builder/actions/workflows/stable.yml)

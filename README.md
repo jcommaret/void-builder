@@ -10,7 +10,7 @@ The  `.patch` files from VSCodium get rid of telemetry in Void (the core purpose
 
 - For an extensive list of all the places we edited inside of this VSCodium fork, search "Void" and "voideditor". We also deleted some workflows we're not using in this VSCodium fork (insider-* and stable-spearhead).
 
-- The workflow that builds Void for Mac is called `stable-macos.sh`. We added some comments so you can understand what's going on. Almost all the code is straight from VSCodium. The Linux and Windows files are very similar.
+- The unified CI workflow is `.github/workflows/stable.yml`: one `check`, one `compile`, then parallel builds for macOS, Linux, Windows, and Linux REH. Almost all of the pipeline logic is straight from VSCodium.
 
 - If you want to build and compile Void yourself, you just need to fork this repo and run the GitHub Workflows. If you want to handle auto updates too, just search for caps-sensitive "Void" and "voideditor" and replace them with your own repo.
 

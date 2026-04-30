@@ -1,4 +1,4 @@
-# Compilation VSCode une fois sur Ubuntu + artifact vscode.tar.gz (appelle-macOS/Linux/Windows).
+# Compilation VSCode sur Ubuntu + artifact vscode.tar.gz — appelé une fois par « stable ».
 name: reusable stable compile
 
 on:
