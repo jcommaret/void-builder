@@ -76,6 +76,10 @@ jobs:
         with:
           node-version: '20.18.2'
 
+      - name: Install Rust x86_64 target (for Intel)
+        if: matrix.vscode_arch == 'x64'
+        run: rustup target add x86_64-apple-darwin
+
       - name: Setup Python 3
         uses: actions/setup-python@v5
         with:
