@@ -351,7 +351,7 @@ jobs:
             libx11-6 \
             libxcb1 \
             libxcomposite1 \
-            libxdamage1
+            libxdamage1 \
             libxext6 \
             libxfixes3 \
             libxkbcommon0 \
