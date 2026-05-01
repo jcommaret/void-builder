@@ -1,0 +1,12 @@
+diff --git a/build/gulpfile.vscode.linux.js b/build/gulpfile.vscode.linux.js
+--- a/build/gulpfile.vscode.linux.js
++++ b/build/gulpfile.vscode.linux.js
+@@ -198,7 +198,8 @@ function prepareRpmPackage(arch) {
+ 		const spec = gulp.src('resources/linux/rpm/code.spec.template', { base: '.' })
+ 			.pipe(replace('@@NAME@@', product.applicationName))
+ 			.pipe(replace('@@NAME_LONG@@', product.nameLong))
+ 			.pipe(replace('@@ICON@@', product.linuxIconName))
+ 			.pipe(replace('@@VERSION@@', packageJson.version))
++			.pipe(replace('@@RELEASE@@', String(Math.floor(Date.now() / 1000))))
+ 			.pipe(replace('@@ARCHITECTURE@@', rpmArch))
+ 			.pipe(replace('@@LICENSE@@', product.licenseName))
