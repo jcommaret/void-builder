@@ -27,6 +27,18 @@ if [[ -z "${BUILD_SOURCEVERSION}" ]]; then
   exit 0
 fi
 
+# --- Gestion de la version persistante ---
+# Si RELEASE_VERSION n'est pas défini, tente de le récupérer depuis un fichier VERSION
+if [[ -z "${RELEASE_VERSION}" ]]; then
+  if [[ -f "VERSION" ]]; then
+    RELEASE_VERSION=$(cat VERSION)
+    echo "Using RELEASE_VERSION from VERSION file: ${RELEASE_VERSION}"
+  else
+    echo "No RELEASE_VERSION or VERSION file found. Exiting."
+    exit 1
+  fi
+fi
+
 # init versions repo for later commiting + pushing the json file to it
 git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git"
 cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
@@ -34,6 +46,95 @@ git config user.email "$( echo "${GITHUB_USERNAME}" | awk '{print tolower($0)}' 
 git config user.name "${GITHUB_USERNAME} CI"
 git remote rm origin
 git remote add origin "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${GH_HOST}/${VERSIONS_REPOSITORY}.git" &> /dev/null
+
+# --- Définition des fonctions après le cd ---
+REPOSITORY_NAME="${VERSIONS_REPOSITORY/*\//}"
+URL_BASE="https://${GH_HOST}/${ASSETS_REPOSITORY}/releases/download/${RELEASE_VERSION}"
+
+generateJson() {
+  local url name version productVersion sha1hash sha256hash timestamp
+  JSON_DATA="{}"
+
+  # generate parts
+  url="${URL_BASE}/${ASSET_NAME}"
+  name="${RELEASE_VERSION}"
+  version="${BUILD_SOURCEVERSION}"
+  productVersion="$( transformVersion "${RELEASE_VERSION}" )"
+  timestamp=$( node -e 'console.log(Date.now())' )
+
+  if [[ ! -f "../assets/${ASSET_NAME}" ]]; then
+    echo "Downloading asset '${ASSET_NAME}'"
+    gh release download --repo "${ASSETS_REPOSITORY}" "${RELEASE_VERSION}" --dir "../assets" --pattern "${ASSET_NAME}*"
+  fi
+
+  sha1hash=$( awk '{ print $1 }' "../assets/${ASSET_NAME}.sha1" )
+  sha256hash=$( awk '{ print $1 }' "../assets/${ASSET_NAME}.sha256" )
+
+  # check that nothing is blank (blank indicates something awry with build)
+  for key in url name version productVersion sha1hash timestamp sha256hash; do
+    if [[ -z "${!key}" ]]; then
+      echo "Variable '${key}' is empty; exiting..."
+      exit 1
+    fi
+  done
+
+  # generate json
+  JSON_DATA=$( jq \
+    --arg url             "${url}" \
+    --arg name            "${name}" \
+    --arg version         "${version}" \
+    --arg productVersion  "${productVersion}" \
+    --arg hash            "${sha1hash}" \
+    --arg timestamp       "${timestamp}" \
+    --arg sha256hash      "${sha256hash}" \
+    '. | .url=$url | .name=$name | .version=$version | .productVersion=$productVersion | .hash=$hash | .timestamp=$timestamp | .sha256hash=$sha256hash' \
+    <<<'{}' )
+}
+
+transformVersion() {
+  local version parts
+
+  version="${1%-insider}"
+
+  IFS='.' read -r -a parts <<< "${version}"
+
+  # Remove leading zeros from third part
+  parts[2]="$((10#${parts[2]}))"
+
+  version="${parts[0]}.${parts[1]}.${parts[2]}.0"
+
+  if [[ "${1}" == *-insider ]]; then
+    version="${version}-insider"
+  fi
+
+  echo "${version}"
+}
+
+updateLatestVersion() {
+  echo "Updating ${VERSION_PATH}/latest.json"
+
+  # do not update the same version
+  if [[ -f "${VERSION_PATH}/latest.json" ]]; then
+    CURRENT_VERSION=$( jq -r '.name' "${VERSION_PATH}/latest.json" )
+    echo "CURRENT_VERSION: ${CURRENT_VERSION}"
+
+    if [[ "${CURRENT_VERSION}" == "${RELEASE_VERSION}" && "${FORCE_UPDATE}" != "true" ]]; then
+      return 0
+    fi
+  fi
+
+  echo "Generating ${VERSION_PATH}/latest.json"
+
+  mkdir -p "${VERSION_PATH}"
+
+  generateJson
+
+  echo "${JSON_DATA}" > "${VERSION_PATH}/latest.json"
+
+  echo "${JSON_DATA}"
+}
+
+# Retour au dossier parent pour accéder aux assets
 cd ..
 
 if [[ "${OS_NAME}" == "osx" ]]; then
@@ -73,6 +174,7 @@ else # linux
   updateLatestVersion
 fi
 
+# Retour au dépôt cloné pour commiter
 cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
 
 git pull origin main
@@ -92,4 +194,10 @@ else
   echo "No changes"
 fi
 
-cd ..
+# --- Sauvegarder la version dans un fichier VERSION pour une utilisation future ---
+echo "${RELEASE_VERSION}" > VERSION
+git add VERSION
+if ! git commit -m "Update VERSION file to ${RELEASE_VERSION}" --quiet; then
+  echo "No changes to VERSION file or already up to date."
+fi
+git push origin main --quiet
