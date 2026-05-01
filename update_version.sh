@@ -39,9 +39,12 @@ if [[ -z "${RELEASE_VERSION}" ]]; then
   fi
 fi
 
+# DÉFINIR REPOSITORY_NAME AVANT DE L'UTILISER
+REPOSITORY_NAME="${VERSIONS_REPOSITORY/*\//}"
+
 # init versions repo for later commiting + pushing the json file to it
 echo "Cloning repository: ${VERSIONS_REPOSITORY}"
-git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git" || { echo "Failed to clone repository ${VERSIONS_REPOSITORY}"; exit 1; }
+git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git" "${REPOSITORY_NAME}" || { echo "Failed to clone repository ${VERSIONS_REPOSITORY}"; exit 1; }
 if [[ ! -d "${REPOSITORY_NAME}" ]]; then
   echo "Error: Cloned directory '${REPOSITORY_NAME}' not found."
   exit 1
@@ -53,7 +56,6 @@ git remote rm origin
 git remote add origin "https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@${GH_HOST}/${VERSIONS_REPOSITORY}.git" &> /dev/null
 
 # --- Définition des fonctions après le cd ---
-REPOSITORY_NAME="${VERSIONS_REPOSITORY/*\//}"
 URL_BASE="https://${GH_HOST}/${ASSETS_REPOSITORY}/releases/download/${RELEASE_VERSION}"
 
 generateJson() {
@@ -180,11 +182,7 @@ else # linux
 fi
 
 # Retour au dépôt cloné pour commiter (chemin relatif explicite)
-if [[ ! -d "../${REPOSITORY_NAME}" ]]; then
-  echo "Error: Directory '../${REPOSITORY_NAME}' not found. Cloning may have failed."
-  exit 1
-fi
-cd "../${REPOSITORY_NAME}" || { echo "'../${REPOSITORY_NAME}' dir not found"; exit 1; }
+cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
 
 git pull origin main
 git add .
