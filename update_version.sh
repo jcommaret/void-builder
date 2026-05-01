@@ -5,6 +5,8 @@ set -e
 
 # Lire voidVersion depuis product.json
 voidVersion=$(jq -r '.voidVersion' product.json)
+# Doit rester aligné avec prepare_assets.sh / release.sh (PAS un nom codé en dur « voidversion »).
+APP_NAME="${APP_NAME:-Void}"
 
 if [[ "${SHOULD_BUILD}" != "yes" && "${FORCE_UPDATE}" != "true" ]]; then
   echo "Will not update version JSON because we did not build"
@@ -156,33 +158,33 @@ if [[ "${OS_NAME}" == "osx" ]]; then
   updateLatestVersion
 elif [[ "${OS_NAME}" == "windows" ]]; then
   # system installer
-  ASSET_NAME="voidversionSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  ASSET_NAME="${APP_NAME}Setup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/system"
   updateLatestVersion
 
   # user installer
-  ASSET_NAME="voidversionUserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  ASSET_NAME="${APP_NAME}UserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/user"
   updateLatestVersion
 
   # windows archive
-  ASSET_NAME="voidversion-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
+  ASSET_NAME="${APP_NAME}-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/archive"
   updateLatestVersion
 
   if [[ "${VSCODE_ARCH}" == "ia32" || "${VSCODE_ARCH}" == "x64" ]]; then
     # msi
-    ASSET_NAME="voidversion-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi"
     updateLatestVersion
 
     # updates-disabled msi
-    ASSET_NAME="voidversion-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi-updates-disabled"
     updateLatestVersion
   fi
 else # linux
-  ASSET_NAME="voidversion-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
+  ASSET_NAME="${APP_NAME}-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
   VERSION_PATH="${VSCODE_QUALITY}/linux/${RELEASE_VERSION}"
   updateLatestVersion
 fi
