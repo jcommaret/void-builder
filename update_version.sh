@@ -28,7 +28,6 @@ if [[ -z "${BUILD_SOURCEVERSION}" ]]; then
 fi
 
 # init versions repo for later commiting + pushing the json file to it
-# thank you https://www.vinaygopinath.me/blog/tech/commit-to-master-branch-on-github-using-travis-ci/
 git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git"
 cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
 git config user.email "$( echo "${GITHUB_USERNAME}" | awk '{print tolower($0)}' )-ci@not-real.com"
@@ -41,3 +40,56 @@ if [[ "${OS_NAME}" == "osx" ]]; then
   ASSET_NAME="${APP_NAME}-${RELEASE_VERSION}.dmg"
   VERSION_PATH="${VSCODE_QUALITY}/darwin/${RELEASE_VERSION}"
   updateLatestVersion
+elif [[ "${OS_NAME}" == "windows" ]]; then
+  # system installer
+  ASSET_NAME="${APP_NAME}Setup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/system"
+  updateLatestVersion
+
+  # user installer
+  ASSET_NAME="${APP_NAME}UserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/user"
+  updateLatestVersion
+
+  # windows archive
+  ASSET_NAME="${APP_NAME}-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
+  VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/archive"
+  updateLatestVersion
+
+  if [[ "${VSCODE_ARCH}" == "ia32" || "${VSCODE_ARCH}" == "x64" ]]; then
+    # msi
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
+    VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi"
+    updateLatestVersion
+
+    # updates-disabled msi
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
+    VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi-updates-disabled"
+    updateLatestVersion
+  fi
+else # linux
+  ASSET_NAME="${APP_NAME}-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
+  VERSION_PATH="${VSCODE_QUALITY}/linux/${RELEASE_VERSION}"
+  updateLatestVersion
+fi
+
+cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
+
+git pull origin main
+git add .
+
+CHANGES=$( git status --porcelain )
+
+if [[ -n "${CHANGES}" ]]; then
+  echo "Some changes have been found, pushing them"
+  dateAndMonth=$( date "+%D %T" )
+  git commit -m "CI update: ${dateAndMonth} (Build ${GITHUB_RUN_NUMBER})"
+  if ! git push origin main --quiet; then
+    git pull origin main
+    git push origin main --quiet
+  fi
+else
+  echo "No changes"
+fi
+
+cd ..
