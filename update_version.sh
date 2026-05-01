@@ -49,6 +49,9 @@ if [[ ! -d "${REPOSITORY_NAME}" ]]; then
   echo "Error: Cloned directory '${REPOSITORY_NAME}' not found."
   exit 1
 fi
+
+# Stocker le chemin absolu du dépôt cloné pour y revenir plus tard
+REPO_ABSOLUTE_PATH=$(pwd)/"${REPOSITORY_NAME}"
 cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
 git config user.email "$( echo "${GITHUB_USERNAME}" | awk '{print tolower($0)}' )-ci@not-real.com"
 git config user.name "${GITHUB_USERNAME} CI"
@@ -181,8 +184,12 @@ else # linux
   updateLatestVersion
 fi
 
-# Retour au dépôt cloné pour commiter (chemin relatif explicite)
-cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
+# Retour au dépôt cloné pour commiter (chemin absolu)
+if [[ ! -d "${REPO_ABSOLUTE_PATH}" ]]; then
+  echo "Error: Directory '${REPO_ABSOLUTE_PATH}' not found. Cloning may have failed."
+  exit 1
+fi
+cd "${REPO_ABSOLUTE_PATH}" || { echo "'${REPO_ABSOLUTE_PATH}' dir not found"; exit 1; }
 
 git pull origin main
 git add .
