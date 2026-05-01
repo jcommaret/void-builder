@@ -40,7 +40,12 @@ if [[ -z "${RELEASE_VERSION}" ]]; then
 fi
 
 # init versions repo for later commiting + pushing the json file to it
-git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git"
+echo "Cloning repository: ${VERSIONS_REPOSITORY}"
+git clone "https://${GH_HOST}/${VERSIONS_REPOSITORY}.git" || { echo "Failed to clone repository ${VERSIONS_REPOSITORY}"; exit 1; }
+if [[ ! -d "${REPOSITORY_NAME}" ]]; then
+  echo "Error: Cloned directory '${REPOSITORY_NAME}' not found."
+  exit 1
+fi
 cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
 git config user.email "$( echo "${GITHUB_USERNAME}" | awk '{print tolower($0)}' )-ci@not-real.com"
 git config user.name "${GITHUB_USERNAME} CI"
