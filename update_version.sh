@@ -3,6 +3,9 @@
 
 set -e
 
+# Lire voidVersion depuis product.json
+voidVersion=$(jq -r '.voidVersion' product.json)
+
 if [[ "${SHOULD_BUILD}" != "yes" && "${FORCE_UPDATE}" != "true" ]]; then
   echo "Will not update version JSON because we did not build"
   exit 0
@@ -148,38 +151,38 @@ updateLatestVersion() {
 cd ..
 
 if [[ "${OS_NAME}" == "osx" ]]; then
-  ASSET_NAME="${APP_NAME}-${RELEASE_VERSION}.dmg"
-  VERSION_PATH="${VSCODE_QUALITY}/darwin/${RELEASE_VERSION}"
+  ASSET_NAME="Void-${voidVersion}.dmg"
+  VERSION_PATH="${VSCODE_QUALITY}/darwin/${voidVersion}"
   updateLatestVersion
 elif [[ "${OS_NAME}" == "windows" ]]; then
   # system installer
-  ASSET_NAME="${APP_NAME}Setup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  ASSET_NAME="voidversionSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/system"
   updateLatestVersion
 
   # user installer
-  ASSET_NAME="${APP_NAME}UserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
+  ASSET_NAME="voidversionUserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/user"
   updateLatestVersion
 
   # windows archive
-  ASSET_NAME="${APP_NAME}-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
+  ASSET_NAME="voidversion-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/archive"
   updateLatestVersion
 
   if [[ "${VSCODE_ARCH}" == "ia32" || "${VSCODE_ARCH}" == "x64" ]]; then
     # msi
-    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
+    ASSET_NAME="voidversion-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi"
     updateLatestVersion
 
     # updates-disabled msi
-    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
+    ASSET_NAME="voidversion-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi-updates-disabled"
     updateLatestVersion
   fi
 else # linux
-  ASSET_NAME="${APP_NAME}-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
+  ASSET_NAME="voidversion-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
   VERSION_PATH="${VSCODE_QUALITY}/linux/${RELEASE_VERSION}"
   updateLatestVersion
 fi
@@ -191,7 +194,7 @@ if [[ ! -d "${REPO_ABSOLUTE_PATH}" ]]; then
 fi
 cd "${REPO_ABSOLUTE_PATH}" || { echo "'${REPO_ABSOLUTE_PATH}' dir not found"; exit 1; }
 
-git pull origin main
+git pull origin master
 git add .
 
 CHANGES=$( git status --porcelain )
@@ -200,9 +203,9 @@ if [[ -n "${CHANGES}" ]]; then
   echo "Some changes have been found, pushing them"
   dateAndMonth=$( date "+%D %T" )
   git commit -m "CI update: ${dateAndMonth} (Build ${GITHUB_RUN_NUMBER})"
-  if ! git push origin main --quiet; then
-    git pull origin main
-    git push origin main --quiet
+if ! git push origin master --quiet; then
+  git pull origin master
+  git push origin master --quiet
   fi
 else
   echo "No changes"
@@ -214,4 +217,4 @@ git add VERSION
 if ! git commit -m "Update VERSION file to ${RELEASE_VERSION}" --quiet; then
   echo "No changes to VERSION file or already up to date."
 fi
-git push origin main --quiet
+git push origin master --quiet

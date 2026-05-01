@@ -3,6 +3,9 @@
 
 set -e
 
+# Lire voidVersion depuis product.json
+voidVersion=$(jq -r '.voidVersion' product.json)
+
 # --- Alias pour les nouveaux noms de secrets macOS (si différents) ---
 CERTIFICATE_OSX_APP_PASSWORD="${CERTIFICATE_OSX_NEW_APP_PASSWORD:-${CERTIFICATE_OSX_APP_PASSWORD}}"
 CERTIFICATE_OSX_ID="${CERTIFICATE_OSX_NEW_ID:-${CERTIFICATE_OSX_ID}}"
@@ -82,9 +85,9 @@ if [[ "${OS_NAME}" == "osx" ]]; then
     echo "Building and moving DMG"
     pushd "VSCode-darwin-${VSCODE_ARCH}"
     npx create-dmg ./*.app .
-    # Renomme le .dmg avec le tag de release (ex: Void-1.85.0.dmg)
+    # Renomme le .dmg avec voidVersion (ex: Void-1.85.0.dmg)
     DMG_FILE=$(ls *.dmg)
-    mv "${DMG_FILE}" "../assets/${APP_NAME}-${RELEASE_VERSION}.dmg"
+    mv "${DMG_FILE}" "../assets/Void-${voidVersion}.dmg"
     popd
   fi
 
