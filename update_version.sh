@@ -174,8 +174,12 @@ else # linux
   updateLatestVersion
 fi
 
-# Retour au dépôt cloné pour commiter
-cd "${REPOSITORY_NAME}" || { echo "'${REPOSITORY_NAME}' dir not found"; exit 1; }
+# Retour au dépôt cloné pour commiter (chemin relatif explicite)
+if [[ ! -d "../${REPOSITORY_NAME}" ]]; then
+  echo "Error: Directory '../${REPOSITORY_NAME}' not found. Cloning may have failed."
+  exit 1
+fi
+cd "../${REPOSITORY_NAME}" || { echo "'../${REPOSITORY_NAME}' dir not found"; exit 1; }
 
 git pull origin main
 git add .
