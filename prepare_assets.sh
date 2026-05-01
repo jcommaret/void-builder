@@ -82,7 +82,9 @@ if [[ "${OS_NAME}" == "osx" ]]; then
     echo "Building and moving DMG"
     pushd "VSCode-darwin-${VSCODE_ARCH}"
     npx create-dmg ./*.app .
-    mv ./*.dmg "../assets/${APP_NAME}.${VSCODE_ARCH}.${RELEASE_VERSION}.dmg"
+    # Renomme le .dmg avec le tag de release (ex: Void-1.85.0.dmg)
+    DMG_FILE=$(ls *.dmg)
+    mv "${DMG_FILE}" "../assets/${APP_NAME}-${RELEASE_VERSION}.dmg"
     popd
   fi
 
