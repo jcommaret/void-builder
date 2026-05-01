@@ -28,12 +28,12 @@ on:
 env:
   ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
   APP_NAME: Void
-  ASSETS_REPOSITORY: ${{ github.repository_owner }}/void
+  ASSETS_REPOSITORY: jcommaret/void  # Déjà correct (pointe vers ton dépôt)
   BINARY_NAME: void
   DISABLE_UPDATE: 'yes'
-  GH_REPO_PATH: ${{ github.repository_owner }}/void
-  ORG_NAME: ${{ github.repository_owner }}
-  VERSIONS_REPOSITORY: ${{ github.repository_owner }}/versions
+  GH_REPO_PATH: jcommaret/void
+  ORG_NAME: jcommaret
+  VERSIONS_REPOSITORY: jcommaret/void  # Modifié : utilise ton dépôt au lieu de "versions"
   VSCODE_QUALITY: stable
 
 jobs:
@@ -241,6 +241,9 @@ jobs:
         env:
           SHOULD_BUILD_REH: 'no'
           SHOULD_BUILD_REH_WEB: 'no'
+          SHOULD_BUILD_ZIP: 'no'  # Désactive la génération du .zip
+          SHOULD_BUILD_SRC: 'no'  # Désactive la génération du .tar.gz des sources
+          SHOULD_BUILD_DMG: 'yes' # Active uniquement la génération du .dmg
           CERTIFICATE_OSX_NEW_APP_PASSWORD: ${{ secrets.CERTIFICATE_OSX_NEW_APP_PASSWORD }}
           CERTIFICATE_OSX_NEW_ID: ${{ secrets.CERTIFICATE_OSX_NEW_ID }}
           CERTIFICATE_OSX_NEW_P12_DATA: ${{ secrets.CERTIFICATE_OSX_NEW_P12_DATA }}
@@ -261,7 +264,10 @@ jobs:
           FORCE_UPDATE: ${{ github.event.inputs.force_version }}
           GITHUB_TOKEN: ${{ secrets.STRONGER_GITHUB_TOKEN }}
           GITHUB_USERNAME: ${{ github.repository_owner }}
-        run: ./update_version.sh
+        run: |
+          # Configure Git to use the token for authentication
+          git config --global url."https://${GITHUB_USERNAME}:${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+          ./update_version.sh
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes' && env.SHOULD_DEPLOY == 'yes'
 
       - name: Upload assets
