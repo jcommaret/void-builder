@@ -9,7 +9,7 @@ diff --git a/build/gulpfile.vscode.linux.js b/build/gulpfile.vscode.linux.js
 +		const packageVersion = packageJson.version;
 +		const versionSep = packageVersion.indexOf('-');
 +		const rpmVersion = versionSep === -1 ? packageVersion : packageVersion.slice(0, versionSep);
-+		const rpmRelease = versionSep === -1 ? String(Math.floor(Date.now() / 1000)) : packageVersion.slice(versionSep + 1).replace(/-/g, '_');
++		const rpmRelease = versionSep === -1 String(Math.floor(Date.now() / 1000))) : packageVersion.slice(versionSep + 1).replace(/-/g, '_');
  
  		const spec = gulp.src('resources/linux/rpm/code.spec.template', { base: '.' })
  			.pipe(replace('@@NAME@@', product.applicationName))
