@@ -13,18 +13,24 @@ REPOSITORY_NAME="${ASSETS_REPOSITORY/*\//}"
 
 npm install -g github-release-cli
 
-# Jobs CI sans get_repo.sh (ex. Windows) n’ont pas toujours VOID_VERSION dans l’environnement.
 VOID_VERSION="${VOID_VERSION:-${RELEASE_VERSION}}"
+if [[ -z "${RELEASE_TITLE}" ]]; then
+  if [[ -n "${MS_TAG}" && -n "${VOID_VERSION}" ]]; then
+    RELEASE_TITLE="${MS_TAG} - ${VOID_VERSION}"
+  else
+    RELEASE_TITLE="${VOID_VERSION:-${RELEASE_VERSION}}"
+  fi
+fi
 
 if [[ $( gh release view "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" 2>&1 ) =~ "release not found" ]]; then
-  echo "Creating release '${RELEASE_VERSION}'"
+  echo "Creating release '${RELEASE_VERSION}' (title: '${RELEASE_TITLE}')"
 
   if [[ "${VSCODE_QUALITY}" == "insider" ]]; then
     NOTES="update vscode to [${MS_COMMIT}](https://github.com/microsoft/vscode/tree/${MS_COMMIT})"
 
-    gh release create "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" --title "${VOID_VERSION}" --notes "${NOTES}"
+    gh release create "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" --title "${RELEASE_TITLE}" --notes "${NOTES}"
   else
-    gh release create "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" --title "${VOID_VERSION}" --generate-notes
+    gh release create "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" --title "${RELEASE_TITLE}" --generate-notes
 
     . ./utils.sh
 

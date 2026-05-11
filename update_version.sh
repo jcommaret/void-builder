@@ -116,6 +116,11 @@ transformVersion() {
 
   version="${1%-insider}"
 
+  # Tag composite type « 1.99.3-1.4.9 » : dériver le semver produit à partir de la base VS Code (prefix avant le tiret).
+  if [[ "${version}" == *-* ]]; then
+    version="${version%%-*}"
+  fi
+
   IFS='.' read -r -a parts <<< "${version}"
 
   # Remove leading zeros from third part

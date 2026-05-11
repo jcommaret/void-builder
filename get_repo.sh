@@ -51,17 +51,18 @@ MS_COMMIT=$VOID_BRANCH # Void - MS_COMMIT doesn't seem to do much
 VOID_VERSION=$( jq -r '.voidVersion // empty' "product.json" )
 [[ "${VOID_VERSION}" == "null" ]] && VOID_VERSION=""
 
-# Tag GitHub / noms d’artefacts : « base VS Code » + « version Void » (ex. 1.99.3 - 1.4.9).
+# Tag Git valide pour gh/GitHub (pas d’espaces) ; titre lisible séparé (RELEASE_TITLE).
 if [[ -n "${VOID_VERSION}" ]]; then
-  RELEASE_VERSION="${MS_TAG} - ${VOID_VERSION}"
+  RELEASE_VERSION="${MS_TAG}-${VOID_VERSION}"
+  RELEASE_TITLE="${MS_TAG} - ${VOID_VERSION}"
 else
   RELEASE_VERSION="${MS_TAG}"
+  RELEASE_TITLE="${MS_TAG}"
 fi
-# Downstream (release.sh, notes) : toujours une version affichable pour le titre.
+# Downstream (release.sh, notes) : VOID_VERSION reste le numéro Void seul quand présent.
 [[ -z "${VOID_VERSION}" ]] && VOID_VERSION="${RELEASE_VERSION}"
-# RELEASE_VERSION alimente package.json / MSI / noms d’artefacts ; rester semver-compatible quand possible.
 
-
+echo "RELEASE_TITLE=\"${RELEASE_TITLE}\""
 echo "RELEASE_VERSION=\"${RELEASE_VERSION}\""
 echo "MS_COMMIT=\"${MS_COMMIT}\""
 echo "MS_TAG=\"${MS_TAG}\""
@@ -73,6 +74,7 @@ if [[ "${GITHUB_ENV}" ]]; then
   echo "MS_TAG=${MS_TAG}" >> "${GITHUB_ENV}"
   echo "MS_COMMIT=${MS_COMMIT}" >> "${GITHUB_ENV}"
   echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "${GITHUB_ENV}"
+  echo "RELEASE_TITLE=${RELEASE_TITLE}" >> "${GITHUB_ENV}"
   echo "VOID_VERSION=${VOID_VERSION}" >> "${GITHUB_ENV}" # Void added this
 fi
 
@@ -82,6 +84,7 @@ echo "----------- get_repo exports -----------"
 echo "MS_TAG ${MS_TAG}"
 echo "MS_COMMIT ${MS_COMMIT}"
 echo "RELEASE_VERSION ${RELEASE_VERSION}"
+echo "RELEASE_TITLE ${RELEASE_TITLE}"
 echo "VOID VERSION ${VOID_VERSION}"
 echo "----------------------"
 
@@ -89,4 +92,5 @@ echo "----------------------"
 export MS_TAG
 export MS_COMMIT
 export RELEASE_VERSION
+export RELEASE_TITLE
 export VOID_VERSION
