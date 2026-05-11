@@ -43,6 +43,7 @@ jobs:
       MS_COMMIT: ${{ env.MS_COMMIT }}
       MS_TAG: ${{ env.MS_TAG }}
       RELEASE_VERSION: ${{ env.RELEASE_VERSION }}
+      VOID_VERSION: ${{ env.VOID_VERSION }}
       SHOULD_BUILD: ${{ env.SHOULD_BUILD }}
       SHOULD_DEPLOY: ${{ env.SHOULD_DEPLOY }}
 
@@ -80,6 +81,7 @@ jobs:
       MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
       MS_TAG: ${{ needs.check.outputs.MS_TAG }}
       RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
+      VOID_VERSION: ${{ needs.check.outputs.VOID_VERSION }}
       SHOULD_BUILD: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
       VSCODE_ARCH: x64
     outputs:
@@ -176,6 +178,7 @@ jobs:
       MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
       MS_TAG: ${{ needs.check.outputs.MS_TAG }}
       RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
+      VOID_VERSION: ${{ needs.check.outputs.VOID_VERSION }}
       SHOULD_BUILD: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
       SHOULD_DEPLOY: ${{ needs.check.outputs.SHOULD_DEPLOY }}
       VSCODE_ARCH: ${{ matrix.vscode_arch }}
@@ -302,6 +305,7 @@ jobs:
       MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
       MS_TAG: ${{ needs.check.outputs.MS_TAG }}
       RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
+      VOID_VERSION: ${{ needs.check.outputs.VOID_VERSION }}
       SHOULD_BUILD: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
       SHOULD_DEPLOY: ${{ needs.check.outputs.SHOULD_DEPLOY }}
       VSCODE_ARCH: ${{ matrix.vscode_arch }}
@@ -413,6 +417,7 @@ jobs:
       MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
       MS_TAG: ${{ needs.check.outputs.MS_TAG }}
       RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
+      VOID_VERSION: ${{ needs.check.outputs.VOID_VERSION }}
       SHOULD_BUILD: ${{ (needs.check.outputs.SHOULD_BUILD == 'yes' || github.event.inputs.generate_assets == 'true') && 'yes' || 'no' }}
       SHOULD_DEPLOY: ${{ needs.check.outputs.SHOULD_DEPLOY }}
       VSCODE_ARCH: ${{ matrix.vscode_arch }}
@@ -506,6 +511,7 @@ jobs:
       MS_COMMIT: ${{ needs.check.outputs.MS_COMMIT }}
       MS_TAG: ${{ needs.check.outputs.MS_TAG }}
       RELEASE_VERSION: ${{ needs.check.outputs.RELEASE_VERSION }}
+      VOID_VERSION: ${{ needs.check.outputs.VOID_VERSION }}
       SHOULD_BUILD: ${{ needs.check.outputs.SHOULD_BUILD }}
       SHOULD_DEPLOY: ${{ needs.check.outputs.SHOULD_DEPLOY }}
       VSCODE_ARCH: ${{ matrix.vscode_arch }}

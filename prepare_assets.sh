@@ -11,6 +11,8 @@ if [[ -z "${voidVersion}" ]] && [[ -f vscode/product.json ]]; then
   [[ "${voidVersion}" == "null" ]] && voidVersion=""
 fi
 
+APP_NAME="${APP_NAME:-Void}"
+
 # --- Alias pour les nouveaux noms de secrets macOS (si différents) ---
 CERTIFICATE_OSX_APP_PASSWORD="${CERTIFICATE_OSX_NEW_APP_PASSWORD:-${CERTIFICATE_OSX_APP_PASSWORD}}"
 CERTIFICATE_OSX_ID="${CERTIFICATE_OSX_NEW_ID:-${CERTIFICATE_OSX_ID}}"

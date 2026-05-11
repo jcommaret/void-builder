@@ -13,6 +13,9 @@ REPOSITORY_NAME="${ASSETS_REPOSITORY/*\//}"
 
 npm install -g github-release-cli
 
+# Jobs CI sans get_repo.sh (ex. Windows) n’ont pas toujours VOID_VERSION dans l’environnement.
+VOID_VERSION="${VOID_VERSION:-${RELEASE_VERSION}}"
+
 if [[ $( gh release view "${RELEASE_VERSION}" --repo "${ASSETS_REPOSITORY}" 2>&1 ) =~ "release not found" ]]; then
   echo "Creating release '${RELEASE_VERSION}'"
 

@@ -57,6 +57,8 @@ if [[ -n "${VOID_VERSION}" ]]; then
 else
   RELEASE_VERSION="${MS_TAG}"
 fi
+# Downstream (release.sh, notes) : toujours une version affichable.
+[[ -z "${VOID_VERSION}" ]] && VOID_VERSION="${RELEASE_VERSION}"
 # RELEASE_VERSION alimente package.json / MSI / noms d’artefacts ; rester semver-compatible quand possible.
 
 

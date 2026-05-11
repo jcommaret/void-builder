@@ -34,10 +34,12 @@ BINARY_DIR="..\\..\\..\\VSCode-win32-${VSCODE_ARCH}"
 LICENSE_DIR="..\\..\\..\\vscode"
 PROGRAM_FILES_86=$( env | sed -n 's/^ProgramFiles(x86)=//p' )
 
+APP_NAME="${APP_NAME:-Void}"
+
 if [[ -z "${1}" ]]; then
-	OUTPUT_BASE_FILENAME="Void-${VSCODE_ARCH}-${RELEASE_VERSION}"
+	OUTPUT_BASE_FILENAME="${APP_NAME}-${VSCODE_ARCH}-${RELEASE_VERSION}"
 else
-	OUTPUT_BASE_FILENAME="Void-${VSCODE_ARCH}-${1}-${RELEASE_VERSION}"
+	OUTPUT_BASE_FILENAME="${APP_NAME}-${VSCODE_ARCH}-${1}-${RELEASE_VERSION}"
 fi
 
 if [[ "${VSCODE_ARCH}" == "ia32" ]]; then
