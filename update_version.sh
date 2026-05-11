@@ -153,7 +153,7 @@ updateLatestVersion() {
 cd ..
 
 if [[ "${OS_NAME}" == "osx" ]]; then
-  ASSET_NAME="Void-${voidVersion}-${VSCODE_ARCH}.dmg"
+  ASSET_NAME="${APP_NAME}-${voidVersion}-${VSCODE_ARCH}.dmg"
   VERSION_PATH="${VSCODE_QUALITY}/darwin/${voidVersion}"
   updateLatestVersion
 elif [[ "${OS_NAME}" == "windows" ]]; then

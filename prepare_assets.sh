@@ -85,9 +85,9 @@ if [[ "${OS_NAME}" == "osx" ]]; then
     echo "Building and moving DMG"
     pushd "VSCode-darwin-${VSCODE_ARCH}"
     npx create-dmg ./*.app .
-    # Renomme le .dmg avec voidVersion (ex: Void-1.85.0.dmg)
+    # Aligné avec update_version.sh : ${APP_NAME}-<voidVersion>-<arch>.dmg
     DMG_FILE=$(ls *.dmg)
-    mv "${DMG_FILE}" "../assets/Void-${voidVersion}.dmg"
+    mv "${DMG_FILE}" "../assets/${APP_NAME}-${voidVersion}-${VSCODE_ARCH}.dmg"
     popd
   fi
 
