@@ -74,8 +74,13 @@ if [[ "${GITHUB_ENV}" ]]; then
   echo "MS_TAG=${MS_TAG}" >> "${GITHUB_ENV}"
   echo "MS_COMMIT=${MS_COMMIT}" >> "${GITHUB_ENV}"
   echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "${GITHUB_ENV}"
-  echo "RELEASE_TITLE=${RELEASE_TITLE}" >> "${GITHUB_ENV}"
-  echo "VOID_VERSION=${VOID_VERSION}" >> "${GITHUB_ENV}" # Void added this
+  echo "VOID_VERSION=${VOID_VERSION}" >> "${GITHUB_ENV}"
+  # Titres avec espaces : syntaxe multiline officielle pour GITHUB_ENV
+  {
+    echo "RELEASE_TITLE<<GITHUB_RELEASE_TITLE"
+    echo "${RELEASE_TITLE}"
+    echo "GITHUB_RELEASE_TITLE"
+  } >> "${GITHUB_ENV}"
 fi
 
 
