@@ -1,7 +1,6 @@
-diff --git a/build/gulpfile.vscode.linux.js b/build/gulpfile.vscode.linux.js
---- a/build/gulpfile.vscode.linux.js
-+++ b/build/gulpfile.vscode.linux.js
-@@ -197,12 +197,17 @@ function prepareRpmPackage(arch) {
+--- gulpfile.vscode.linux.js	2026-05-12 00:10:08
++++ fixed.js	2026-05-12 00:10:05
+@@ -197,12 +197,17 @@
  		const code = gulp.src(binaryDir + '/**/*', { base: binaryDir })
  			.pipe(rename(function (p) { p.dirname = 'BUILD/usr/share/' + product.applicationName + '/' + p.dirname; }));
  

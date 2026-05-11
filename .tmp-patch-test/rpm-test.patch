@@ -1,7 +1,7 @@
 diff --git a/build/gulpfile.vscode.linux.js b/build/gulpfile.vscode.linux.js
 --- a/build/gulpfile.vscode.linux.js
 +++ b/build/gulpfile.vscode.linux.js
-@@ -197,12 +197,17 @@ function prepareRpmPackage(arch) {
+@@ -197,9 +197,14 @@ function prepareRpmPackage(arch) {
  		const code = gulp.src(binaryDir + '/**/*', { base: binaryDir })
  			.pipe(rename(function (p) { p.dirname = 'BUILD/usr/share/' + product.applicationName + '/' + p.dirname; }));
  
@@ -20,4 +20,3 @@ diff --git a/build/gulpfile.vscode.linux.js b/build/gulpfile.vscode.linux.js
 +			.pipe(replace('@@RELEASE@@', rpmRelease))
  			.pipe(replace('@@ARCHITECTURE@@', rpmArch))
  			.pipe(replace('@@LICENSE@@', product.licenseName))
- 			.pipe(replace('@@QUALITY@@', product.quality || '@@QUALITY@@'))
