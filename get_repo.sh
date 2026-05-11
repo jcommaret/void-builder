@@ -48,15 +48,16 @@ fi
 
 MS_TAG=$( jq -r '.version' "package.json" )
 MS_COMMIT=$VOID_BRANCH # Void - MS_COMMIT doesn't seem to do much
-VOID_VERSION=$( jq -r '.voidVersion' "product.json" ) # Void added this
+VOID_VERSION=$( jq -r '.voidVersion // empty' "product.json" )
+[[ "${VOID_VERSION}" == "null" ]] && VOID_VERSION=""
 
-if [[ -n "${VOID_VERSION}" ]]; then # Use voidVersion instead of voidRelease
-  RELEASE_VERSION="${MS_TAG}+${VOID_VERSION}"
+# Tag / assets GitHub : uniquement la version Void (ex. 1.4.9), pas MS_TAG+voidVersion.
+if [[ -n "${VOID_VERSION}" ]]; then
+  RELEASE_VERSION="${VOID_VERSION}"
 else
-  VOID_VERSION=$( jq -r '.voidVersion' "product.json" )
-  RELEASE_VERSION="${MS_TAG}+${VOID_VERSION}"
+  RELEASE_VERSION="${MS_TAG}"
 fi
-# Void - RELEASE_VERSION is later used as version (1.0.3+RELEASE_VERSION), so it MUST be a number or it will throw a semver error in void
+# RELEASE_VERSION alimente package.json / MSI / noms d’artefacts ; rester semver-compatible quand possible.
 
 
 echo "RELEASE_VERSION=\"${RELEASE_VERSION}\""

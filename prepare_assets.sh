@@ -3,8 +3,13 @@
 
 set -e
 
-# Lire voidVersion depuis product.json
-voidVersion=$(jq -r '.voidVersion' product.json)
+# voidVersion : même logique que update_version.sh (voir racine vs vscode/product.json).
+voidVersion=$(jq -r '.voidVersion // empty' product.json)
+[[ "${voidVersion}" == "null" ]] && voidVersion=""
+if [[ -z "${voidVersion}" ]] && [[ -f vscode/product.json ]]; then
+  voidVersion=$(jq -r '.voidVersion // empty' vscode/product.json)
+  [[ "${voidVersion}" == "null" ]] && voidVersion=""
+fi
 
 # --- Alias pour les nouveaux noms de secrets macOS (si différents) ---
 CERTIFICATE_OSX_APP_PASSWORD="${CERTIFICATE_OSX_NEW_APP_PASSWORD:-${CERTIFICATE_OSX_APP_PASSWORD}}"

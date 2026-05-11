@@ -3,8 +3,13 @@
 
 set -e
 
-# Lire voidVersion depuis product.json
-voidVersion=$(jq -r '.voidVersion' product.json)
+# voidVersion : la racine du builder n’a souvent pas la clé ; elle est dans vscode/product.json après merge (prepare_vscode).
+voidVersion=$(jq -r '.voidVersion // empty' product.json)
+[[ "${voidVersion}" == "null" ]] && voidVersion=""
+if [[ -z "${voidVersion}" ]] && [[ -f vscode/product.json ]]; then
+  voidVersion=$(jq -r '.voidVersion // empty' vscode/product.json)
+  [[ "${voidVersion}" == "null" ]] && voidVersion=""
+fi
 # Doit rester aligné avec prepare_assets.sh / release.sh (PAS un nom codé en dur « voidversion »).
 APP_NAME="${APP_NAME:-Void}"
 
@@ -157,34 +162,34 @@ if [[ "${OS_NAME}" == "osx" ]]; then
   VERSION_PATH="${VSCODE_QUALITY}/darwin/${voidVersion}"
   updateLatestVersion
 elif [[ "${OS_NAME}" == "windows" ]]; then
-  # system installer
-  ASSET_NAME="${APP_NAME}Setup-${VSCODE_ARCH}-${voidVersion}-${RELEASE_VERSION}.exe"
+  # system installer (prepare_assets : pas de voidVersion dans le nom de fichier)
+  ASSET_NAME="${APP_NAME}Setup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/system"
   updateLatestVersion
 
   # user installer
-  ASSET_NAME="${APP_NAME}UserSetup-${VSCODE_ARCH}-${voidVersion}-${RELEASE_VERSION}.exe"
+  ASSET_NAME="${APP_NAME}UserSetup-${VSCODE_ARCH}-${RELEASE_VERSION}.exe"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/user"
   updateLatestVersion
 
   # windows archive
-  ASSET_NAME="${APP_NAME}-win32-${VSCODE_ARCH}-${voidVersion}-${RELEASE_VERSION}.zip"
+  ASSET_NAME="${APP_NAME}-win32-${VSCODE_ARCH}-${RELEASE_VERSION}.zip"
   VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/archive"
   updateLatestVersion
 
   if [[ "${VSCODE_ARCH}" == "ia32" || "${VSCODE_ARCH}" == "x64" ]]; then
     # msi
-    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-${voidVersion}-${RELEASE_VERSION}.msi"
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi"
     updateLatestVersion
 
     # updates-disabled msi
-    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-updates-disabled-${voidVersion}-${RELEASE_VERSION}.msi"
+    ASSET_NAME="${APP_NAME}-${VSCODE_ARCH}-updates-disabled-${RELEASE_VERSION}.msi"
     VERSION_PATH="${VSCODE_QUALITY}/win32/${RELEASE_VERSION}/msi-updates-disabled"
     updateLatestVersion
   fi
 else # linux
-  ASSET_NAME="${APP_NAME}-linux-${VSCODE_ARCH}-${voidVersion}-${RELEASE_VERSION}.tar.gz"
+  ASSET_NAME="${APP_NAME}-linux-${VSCODE_ARCH}-${RELEASE_VERSION}.tar.gz"
   VERSION_PATH="${VSCODE_QUALITY}/linux/${RELEASE_VERSION}"
   updateLatestVersion
 fi
