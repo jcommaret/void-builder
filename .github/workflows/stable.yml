@@ -400,7 +400,9 @@ jobs:
   # ─── Windows ──────────────────────────────────────────────
   build_windows:
     needs: [check, compile]
-    runs-on: windows-latest
+    # windows-latest peut exposer Visual Studio trop récent (ex. dossier « 18 ») mal reconnu par node-gyp,
+    # ce qui casse la compilation native (@vscode/deviceid, policy-watcher, etc.).
+    runs-on: windows-2022
     strategy:
       fail-fast: false
       matrix:
@@ -422,6 +424,8 @@ jobs:
       SHOULD_DEPLOY: ${{ needs.check.outputs.SHOULD_DEPLOY }}
       VSCODE_ARCH: ${{ matrix.vscode_arch }}
       OS_NAME: windows
+      # Force une toolchain MSVC comprise par node-gyp sur windows-2022.
+      npm_config_msvs_version: '2022'
 
     steps:
       - uses: actions/checkout@v5
@@ -450,6 +454,18 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: vscode
+        if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
+
+      # Python 3.14 sur le runner casse souvent node-gyp ; 3.12 est la cible habituelle des addons VS Code.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+        if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
+
+      # Variables d’environnement (LIB, INCLUDE, PATH) pour que node-gyp trouve cl.exe / MSBuild.
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.vscode_arch == 'arm64' && 'amd64_arm64' || 'x64' }}
         if: env.DISABLED != 'yes' && env.SHOULD_BUILD == 'yes'
 
       - name: Build
