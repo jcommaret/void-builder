@@ -38,11 +38,52 @@ if [[ "${OS_NAME}" == "osx" ]]; then
 
   cp "target/${VSCODE_CLI_TARGET}/release/code" "../../VSCode-darwin-${VSCODE_ARCH}/${NAME_SHORT}.app/Contents/Resources/app/bin/${TUNNEL_APPLICATION_NAME}"
 elif [[ "${OS_NAME}" == "windows" ]]; then
+  # Git Bash place usr\bin très tôt dans PATH : rustc invoque alors « link.exe » Unix,
+  # pas le linker MSVC (erreur « /usr/bin/link: extra operand »).
+  _sanitize_path_for_rust_windows() {
+    local result="" dir norm tmp
+    tmp="${PATH//;/:}"
+    tmp="${tmp}:"
+    while [[ -n "$tmp" ]]; do
+      dir="${tmp%%:*}"
+      tmp="${tmp#*:}"
+      [[ -z "${dir}" ]] && continue
+      norm="${dir//\\//}"
+      if [[ "${norm}" =~ [Gg]it/.*/usr/bin ]]; then
+        continue
+      fi
+      [[ -n "${result}" ]] && result="${result}:"
+      result="${result}${dir}"
+    done
+    printf '%s' "${result}"
+  }
+
+  # VsDevCmd / ilammy/msvc-dev-cmd : forcer link.exe MSVC (Hostx64/x64 ou Hostx64/arm64).
+  _force_msvc_linker_for_rust() {
+    local host="${1}"
+    local vc="${VCToolsInstallDir:-}"
+    [[ -z "${vc}" ]] && return 0
+    vc="${vc//\\//}"
+    [[ "${vc}" != */ ]] && vc="${vc}/"
+    local bindir="${vc}bin/Hostx64/${host}"
+    local linkexe="${bindir}/link.exe"
+    [[ ! -f "${linkexe}" ]] && return 0
+    export PATH="${bindir}:${PATH}"
+    case "${host}" in
+      arm64) export CARGO_TARGET_AARCH64_PC_WINDOWS_MSVC_LINKER="${linkexe}" ;;
+      x64) export CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER="${linkexe}" ;;
+    esac
+  }
+
+  export PATH="$(_sanitize_path_for_rust_windows)"
+
   if [[ "${VSCODE_ARCH}" == "arm64" ]]; then
     VSCODE_CLI_TARGET="aarch64-pc-windows-msvc"
+    _force_msvc_linker_for_rust "arm64"
     export VSCODE_CLI_RUST="-C target-feature=+crt-static -Clink-args=/guard:cf -Clink-args=/CETCOMPAT:NO"
   else
     VSCODE_CLI_TARGET="x86_64-pc-windows-msvc"
+    _force_msvc_linker_for_rust "x64"
     export VSCODE_CLI_RUSTFLAGS="-Ctarget-feature=+crt-static -Clink-args=/guard:cf -Clink-args=/CETCOMPAT"
   fi
 
