@@ -51,13 +51,13 @@ MS_COMMIT=$VOID_BRANCH # Void - MS_COMMIT doesn't seem to do much
 VOID_VERSION=$( jq -r '.voidVersion // empty' "product.json" )
 [[ "${VOID_VERSION}" == "null" ]] && VOID_VERSION=""
 
-# Tag / assets GitHub : uniquement la version Void (ex. 1.4.9), pas MS_TAG+voidVersion.
+# Tag GitHub / noms d’artefacts : « base VS Code » + « version Void » (ex. 1.99.3 - 1.4.9).
 if [[ -n "${VOID_VERSION}" ]]; then
-  RELEASE_VERSION="${VOID_VERSION}"
+  RELEASE_VERSION="${MS_TAG} - ${VOID_VERSION}"
 else
   RELEASE_VERSION="${MS_TAG}"
 fi
-# Downstream (release.sh, notes) : toujours une version affichable.
+# Downstream (release.sh, notes) : toujours une version affichable pour le titre.
 [[ -z "${VOID_VERSION}" ]] && VOID_VERSION="${RELEASE_VERSION}"
 # RELEASE_VERSION alimente package.json / MSI / noms d’artefacts ; rester semver-compatible quand possible.
 
